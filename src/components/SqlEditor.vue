@@ -7,18 +7,19 @@ import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
 import { sql, SQLite } from '@codemirror/lang-sql'
 
 const output = ref(db.exec(''))
+const editorView = ref<EditorView>(new EditorView)
 const editorState = EditorState.create({
-  extensions: [basicSetup, sql({ dialect: SQLite })],
-  doc: "CREATE TABLE hello (a int, b char); \n\
-INSERT INTO hello VALUES (0, 'hello'); \n\
-INSERT INTO hello VALUES (1, 'world'); \n\
-SELECT * FROM hello;\n"
+  extensions: [basicSetup, sql({ dialect: SQLite, upperCaseKeywords: true })],
+  doc: `CREATE TABLE hello (a int, b char);
+INSERT INTO hello VALUES (0, 'hello');
+INSERT INTO hello VALUES (1, 'world');
+SELECT * FROM hello;`
 })
 function exec() {
-  output.value = db.exec(editorState.doc.toJSON().reduce((acc, line) => acc + line + '\n', ''));
+  output.value = db.exec(editorView.value.state.doc.toJSON().reduce((acc, line) => acc + line + '\n', ''));
 }
 onMounted(() => {
-  new EditorView({ state: editorState, parent: document.querySelector('#editor-wrapper')! })
+  editorView.value = new EditorView({ state: editorState, parent: document.querySelector('#editor-wrapper')! })
 })
 </script>
 
