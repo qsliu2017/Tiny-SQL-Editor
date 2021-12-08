@@ -1,38 +1,31 @@
 <script setup lang="ts">
 import { ref } from '@vue/reactivity';
+import { onMounted } from 'vue'
 import db from '../lib/db'
+import Result from './Result.vue';
+import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
+import { sql, SQLite } from '@codemirror/lang-sql'
 
-const input = ref('');
 const output = ref(db.exec(''))
-
-const exec = () => output.value = db.exec(input.value);
-(function init() {
-  input.value = "CREATE TABLE hello (a int, b char); \
-INSERT INTO hello VALUES (0, 'hello'); \
-INSERT INTO hello VALUES (1, 'world');"
-  exec()
-  input.value = "SELECT * FROM hello;"
-  exec()
-})()
+const editorState = EditorState.create({
+  extensions: [basicSetup, sql({ dialect: SQLite })],
+  doc: "CREATE TABLE hello (a int, b char); \n\
+INSERT INTO hello VALUES (0, 'hello'); \n\
+INSERT INTO hello VALUES (1, 'world'); \n\
+SELECT * FROM hello;\n"
+})
+function exec() {
+  output.value = db.exec(editorState.doc.toJSON().reduce((acc, line) => acc + line + '\n', ''));
+}
+onMounted(() => {
+  new EditorView({ state: editorState, parent: document.querySelector('#editor-wrapper')! })
+})
 </script>
 
 <template>
   <div>
-    <textarea v-model="input"></textarea>
+    <div id="editor-wrapper"></div>
     <button @click="exec">Execute</button>
-    <div>
-      <table v-for="table of output">
-        <thead>
-          <tr>
-            <td v-for="column in table.columns">{{ column }}</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in table.values">
-            <td v-for="cell in row">{{ cell }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Result :output="output" />
   </div>
 </template>
