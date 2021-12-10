@@ -12,7 +12,7 @@ const asSqlResult = (result: ExecResult) => result as SqlResult[];
   <div v-if="isErr(result)" class="error">
     <p>{{ asErr(result).message }}</p>
   </div>
-  <div v-else>
+  <pre v-else class="output">
     <table v-for="table of asSqlResult(result)">
       <thead>
         <tr>
@@ -25,7 +25,7 @@ const asSqlResult = (result: ExecResult) => result as SqlResult[];
         </tr>
       </tbody>
     </table>
-  </div>
+  </pre>
 </template>
 
 <style scoped>
@@ -34,6 +34,9 @@ const asSqlResult = (result: ExecResult) => result as SqlResult[];
   transition: 0.5s;
   overflow: hidden;
   margin: 15px;
+}
+.output {
+  overflow: auto;
 }
 
 table {
