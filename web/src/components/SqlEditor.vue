@@ -32,7 +32,7 @@ const exec = () => { result.value = props.sqlExecutor(getSql()) }
 
 <template>
   <div>
-    <div v-cm-editor></div>
+    <div v-cm-editor="true"></div>
     <button @click="exec">Execute</button>
     <Result v-if="result" :result="result" />
   </div>
